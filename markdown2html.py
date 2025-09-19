@@ -21,18 +21,25 @@ if __name__ == "__main__":
     with open(input_file, "r") as md, open(output_file, "w") as html:
         in_ul = False
         in_ol = False
+        in_p = False
 
         for line in md:
-            line = line.strip()
+            line = line.rstrip()
 
             match = re.match(r"^(#{1,6}) (.*)", line)
             if match:
+                if in_p:
+                    html.write("</p>\n")
+                    in_p = False
                 level = len(match.group(1))
                 content = match.group(2)
                 html.write("<h{}>{}</h{}>\n".format(level, content, level))
                 continue
 
             if line.startswith("- "):
+                if in_p:
+                    html.write("</p>\n")
+                    in_p = False
                 if not in_ul:
                     html.write("<ul>\n")
                     in_ul = True
@@ -44,6 +51,9 @@ if __name__ == "__main__":
                     in_ul = False
 
             if line.startswith("* "):
+                if in_p:
+                    html.write("</p>\n")
+                    in_p = False
                 if not in_ol:
                     html.write("<ol>\n")
                     in_ol = True
@@ -54,9 +64,24 @@ if __name__ == "__main__":
                     html.write("</ol>\n")
                     in_ol = False
 
+            if line.strip() == "":
+                if in_p:
+                    html.write("</p>\n")
+                    in_p = False
+                continue
+            else:
+                if not in_p:
+                    html.write("<p>\n")
+                    in_p = True
+                    html.write(line + "\n")
+                else:
+                    html.write("<br/>\n" + line + "\n")
+
         if in_ul:
             html.write("</ul>\n")
         if in_ol:
             html.write("</ol>\n")
+        if in_p:
+            html.write("</p>\n")
 
     sys.exit(0)
