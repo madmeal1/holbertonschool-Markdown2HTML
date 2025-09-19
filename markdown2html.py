@@ -5,6 +5,13 @@ import os
 import re
 
 
+def apply_formatting(text):
+    """Replace Markdown bold/emphasis by HTML tags"""
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+    text = re.sub(r"__(.+?)__", r"<em>\1</em>", text)
+    return text
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: ./markdown2html.py README.md README.html",
@@ -32,7 +39,7 @@ if __name__ == "__main__":
                     html.write("</p>\n")
                     in_p = False
                 level = len(match.group(1))
-                content = match.group(2)
+                content = apply_formatting(match.group(2))
                 html.write("<h{}>{}</h{}>\n".format(level, content, level))
                 continue
 
@@ -43,7 +50,9 @@ if __name__ == "__main__":
                 if not in_ul:
                     html.write("<ul>\n")
                     in_ul = True
-                html.write("<li>{}</li>\n".format(line[2:].strip()))
+                html.write(
+                    "<li>{}</li>\n".format(apply_formatting(line[2:].strip()))
+                )
                 continue
             else:
                 if in_ul:
@@ -57,7 +66,9 @@ if __name__ == "__main__":
                 if not in_ol:
                     html.write("<ol>\n")
                     in_ol = True
-                html.write("<li>{}</li>\n".format(line[2:].strip()))
+                html.write(
+                    "<li>{}</li>\n".format(apply_formatting(line[2:].strip()))
+                )
                 continue
             else:
                 if in_ol:
@@ -73,9 +84,9 @@ if __name__ == "__main__":
                 if not in_p:
                     html.write("<p>\n")
                     in_p = True
-                    html.write(line + "\n")
+                    html.write(apply_formatting(line) + "\n")
                 else:
-                    html.write("<br/>\n" + line + "\n")
+                    html.write("<br/>\n" + apply_formatting(line) + "\n")
 
         if in_ul:
             html.write("</ul>\n")
