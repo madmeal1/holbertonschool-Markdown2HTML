@@ -1,2 +1,3 @@
-- Hello
-- Bye
+# My title
+* Hello
+* Bye
