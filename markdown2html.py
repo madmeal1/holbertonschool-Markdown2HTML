@@ -19,6 +19,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     with open(input_file, "r") as md, open(output_file, "w") as html:
+        in_list = False
         for line in md:
             line = line.rstrip("\n")
             match = re.match(r"^(#{1,6}) (.*)", line)
@@ -26,5 +27,19 @@ if __name__ == "__main__":
                 level = len(match.group(1))
                 content = match.group(2)
                 html.write("<h{}>{}</h{}>\n".format(level, content, level))
+                continue
+
+            if line.startswith("- "):
+                if not in_list:
+                    html.write("<ul>\n")
+                    in_list = True
+                html.write("<li>{}</li>\n".format(line[2:].strip()))
+            else:
+                if in_list:
+                    html.write("</ul>\n")
+                    in_list = False
+
+        if in_list:
+            html.write("</ul>\n")
 
     sys.exit(0)
