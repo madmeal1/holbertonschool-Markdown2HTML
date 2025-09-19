@@ -3,12 +3,33 @@
 import sys
 import os
 import re
+import hashlib
 
 
 def apply_formatting(text):
-    """Replace Markdown bold/emphasis by HTML tags"""
+    """Replace Markdown bold/emphasis by HTML tags\
+          and apply special formatting."""
+    text = apply_special_formatting(text)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"__(.+?)__", r"<em>\1</em>", text)
+    return text
+
+
+def apply_special_formatting(text):
+    """Apply [[MD5]] and ((remove C)) transformations."""
+    def md5_replace(match):
+        value = match.group(1)
+        md5 = hashlib.md5(value.encode()).hexdigest()
+        return md5
+
+    text = re.sub(r"\[\[(.+?)\]\]", md5_replace, text)
+
+    def remove_c(match):
+        value = match.group(1)
+        return re.sub(r"[cC]", "", value)
+
+    text = re.sub(r"\(\((.+?)\)\)", remove_c, text)
+
     return text
 
 
